@@ -1,40 +1,45 @@
 public class Pelicula {
-    private String nombre;
-    private int capacidad;
+    private String titulo;
+    private double precioEntrada;
+    private int capacidadMaxima;
     private int entradasVendidas;
-    private double precio;
 
-    public Pelicula(String nombre, int capacidad, double precio) {
-        this.nombre = nombre;
-        this.capacidad = capacidad;
-        this.precio = precio;
+    public Pelicula(String titulo, double precioEntrada, int capacidadMaxima) {
+        // Validaciones simples sin excepciones
+        this.titulo = (titulo == null || titulo.trim().isEmpty()) ? "Película Sin Nombre" : titulo;
+        this.precioEntrada = (precioEntrada <= 0) ? 1.0 : precioEntrada;
+        this.capacidadMaxima = (capacidadMaxima <= 0) ? 23 : capacidadMaxima;
         this.entradasVendidas = 0;
     }
 
     // Getters
-    public String getNombre() { return nombre; }
-    public int getCapacidad() { return capacidad; }
+    public String getTitulo() { return titulo; }
+    public double getPrecioEntrada() { return precioEntrada; }
+    public int getCapacidadMaxima() { return capacidadMaxima; }
     public int getEntradasVendidas() { return entradasVendidas; }
-    public double getPrecio() { return precio; }
 
     public boolean venderEntradas(int cantidad) {
-        if (entradasVendidas + cantidad <= capacidad) {
-            entradasVendidas += cantidad;
-            return true;
+        // Validación simple sin excepciones
+        if (cantidad <= 0) {
+            return false;
         }
-        return false;
+        if (entradasVendidas + cantidad > capacidadMaxima) {
+            return false;
+        }
+        entradasVendidas += cantidad;
+        return true;
     }
 
     public int getEntradasDisponibles() {
-        return capacidad - entradasVendidas;
+        return capacidadMaxima - entradasVendidas;
     }
 
     public double getTotalRecaudado() {
-        return entradasVendidas * precio;
+        return entradasVendidas * precioEntrada;
     }
 
     @Override
     public String toString() {
-        return nombre + " - $" + precio;
+        return titulo + " - $" + precioEntrada;
     }
 }
