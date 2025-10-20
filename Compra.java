@@ -1,25 +1,25 @@
 public class Compra {
-    private String cedula;
+    private String nombreCliente;
+    private String apellidoCliente;
     private Pelicula pelicula;
-    private int cantidad;
+    private int cantidadEntradas;
     private double totalPago;
 
-    public Compra(String cedula, Pelicula pelicula, int cantidad) {
-        this.cedula = cedula;
+    public Compra(String nombre, String apellido, Pelicula pelicula, int cantidad) {
+        this.nombreCliente = nombre;
+        this.apellidoCliente = apellido;
         this.pelicula = pelicula;
-        this.cantidad = cantidad;
-        this.totalPago = cantidad * pelicula.getPrecio();
+        this.cantidadEntradas = cantidad;
+        this.totalPago = cantidad * pelicula.getPrecioEntrada();
+    }
+
+    public String toString() {
+        return String.format("Película: %s | Entradas: %d | Cliente: %s %s | Total: $%.2f",
+                pelicula.getTitulo(), cantidadEntradas, nombreCliente, apellidoCliente, totalPago);
     }
 
     // Getters
-    public String getCedula() { return cedula; }
     public Pelicula getPelicula() { return pelicula; }
-    public int getCantidad() { return cantidad; }
+    public int getCantidadEntradas() { return cantidadEntradas; }
     public double getTotalPago() { return totalPago; }
-
-    @Override
-    public String toString() {
-        return String.format("Película: %s | Cédula: %s | Entradas: %d | Total: $%.2f",
-                pelicula.getNombre(), cedula, cantidad, totalPago);
-    }
 }

@@ -7,156 +7,161 @@ import java.awt.event.KeyEvent;
 public class Ventana {
 
     private JPanel panel1;
-    private JComboBox<String> comboPeliculas;
-    private JTextField txtCedula;
-    private JTextField txtCantidad;
-    private JButton btnComprar;
+    private JTextField txtNombre;
+    private JTextField txtApellido;
+    private JComboBox<Pelicula> comboBox1;
+    private JButton comprarButton;
     private JTextArea txtCompras;
-        private JLabel lblPiratas;
-        private JLabel lblNaruto;
-        private JLabel lblAntman;
+    private JLabel DisponiblesM;
+    private JLabel DisponiblesB;
+    private JLabel DisponibleX;
+    private JTextField txtEntradas;
+    private JLabel lblTotalRecaudado;
 
-        private Cine cineManager = new Cine();
+    private Cine cine = new Cine();
 
-        public Ventana() {
-            inicializarComponentes();
-            configurarEventos();
-            actualizarTotales();
+    public Ventana() {
+        inicializarComboBox();
+        configurarEventos();
+        actualizarDisponibilidad();
+        actualizarTotalRecaudado();
+    }
+
+    private void inicializarComboBox() {
+        DefaultComboBoxModel<Pelicula> model = new DefaultComboBoxModel<>();
+        for (Pelicula pelicula : cine.getPeliculas()) {
+            model.addElement(pelicula);
         }
+        comboBox1.setModel(model);
+    }
 
-        private void inicializarComponentes() {
-            // Configurar ComboBox solo con nombres de películas
-            comboPeliculas.addItem("PIRATAS");
-            comboPeliculas.addItem("NARUTO");
-            comboPeliculas.addItem("ANTMAN");
-        }
+    private void configurarEventos() {
+        // Validación para solo números en txtEntradas
+        txtEntradas.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE && c != KeyEvent.VK_DELETE) {
+                    e.consume();
+                }
+            }
+        });
 
-        private void configurarEventos() {
-            // Validación para solo números en cédula y cantidad
-            txtCedula.addKeyListener(new KeyAdapter() {
-                public void keyTyped(KeyEvent e) {
-                    char c = e.getKeyChar();
-                    if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE && c != KeyEvent.VK_DELETE) {
-                        e.consume();
+        // ActionListener para el botón comprar CON TODO EL CÓDIGO DENTRO
+        comprarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO EL CÓDIGO DE realizarCompra() VA AQUÍ DENTRO
+                try {
+                    String nombre = txtNombre.getText().trim();
+                    String apellido = txtApellido.getText().trim();
+                    Pelicula peliculaSeleccionada = (Pelicula) comboBox1.getSelectedItem();
+                    String cantidadTexto = txtEntradas.getText().trim();
+
+                    // Validar que se ingresó cantidad
+                    if (cantidadTexto.isEmpty()) {
+                        JOptionPane.showMessageDialog(panel1, "Debe ingresar la cantidad de entradas");
+                        txtEntradas.requestFocus();
+                        return;
                     }
-                }
-            });
 
-            txtCantidad.addKeyListener(new KeyAdapter() {
-                public void keyTyped(KeyEvent e) {
-                    char c = e.getKeyChar();
-                    if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE && c != KeyEvent.VK_DELETE) {
-                        e.consume();
+                    int cantidad = Integer.parseInt(cantidadTexto);
+
+                    // Validar rango 1-4
+                    if (cantidad < 1 || cantidad > 4) {
+                        JOptionPane.showMessageDialog(panel1, "La cantidad debe ser entre 1 y 4 entradas");
+                        txtEntradas.requestFocus();
+                        return;
                     }
-                }
-            });
 
-            // ActionListener para el botón comprar
-            btnComprar.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    realizarCompra();
-                }
-            });
-        }
+                    // Resto de validaciones...
+                    if (nombre.isEmpty() || apellido.isEmpty()) {
+                        JOptionPane.showMessageDialog(panel1, "Debe ingresar nombre y apellido");
+                        return;
+                    }
 
-        private void realizarCompra() {
-            try {
-                String cedula = txtCedula.getText().trim();
-                String peliculaSeleccionada = (String) comboPeliculas.getSelectedItem();
-                String cantidadTexto = txtCantidad.getText().trim();
+                    if (peliculaSeleccionada == null) {
+                        JOptionPane.showMessageDialog(panel1, "Debe seleccionar una película");
+                        return;
+                    }
 
-                // Validar cédula
-                if (cedula.isEmpty()) {
-                    JOptionPane.showMessageDialog(panel1, "Debe ingresar la cédula");
-                    txtCedula.requestFocus();
-                    return;
-                }
-
-                // Validar cantidad
-                if (cantidadTexto.isEmpty()) {
-                    JOptionPane.showMessageDialog(panel1, "Debe ingresar la cantidad de entradas (1-5)");
-                    txtCantidad.requestFocus();
-                    return;
-                }
-
-                int cantidad = Integer.parseInt(cantidadTexto);
-
-                // Validar rango 1-5
-                if (cantidad < 1 || cantidad > 5) {
-                    JOptionPane.showMessageDialog(panel1, "La cantidad debe ser entre 1 y 5 entradas");
-                    txtCantidad.requestFocus();
-                    return;
-                }
-
-                // Realizar compra
-                if (cineManager.realizarCompra(cedula, peliculaSeleccionada, cantidad)) {
-                    actualizarInterfaz();
-                    limpiarCampos();
-                    JOptionPane.showMessageDialog(panel1, "Compra realizada exitosamente!");
-                } else {
-                    if (cineManager.cedulaExiste(cedula)) {
-                        JOptionPane.showMessageDialog(panel1, "Error: La cédula ya tiene una compra registrada");
+                    // Realizar compra
+                    if (cine.realizarCompra(nombre, apellido, peliculaSeleccionada.getTitulo(), cantidad)) {
+                        actualizarInterfaz();
+                        limpiarCampos();
+                        JOptionPane.showMessageDialog(panel1, "Compra realizada exitosamente!");
                     } else {
                         JOptionPane.showMessageDialog(panel1, "No hay suficientes entradas disponibles");
                     }
-                }
 
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(panel1, "La cantidad debe ser un número válido");
-                txtCantidad.requestFocus();
-            }
-        }
-
-        private void actualizarInterfaz() {
-            actualizarCompras();
-            actualizarTotales();
-        }
-
-        private void actualizarCompras() {
-            txtCompras.setText("");
-
-            // Mostrar todas las compras en el formato solicitado
-            for (Compra compra : cineManager.getCompras()) {
-                txtCompras.append(compra.toString() + "\n");
-            }
-
-            if (cineManager.getCompras().isEmpty()) {
-                txtCompras.setText("No hay compras realizadas");
-            }
-        }
-
-        private void actualizarTotales() {
-            // Actualizar solo los totales en dinero para cada película
-            for (Pelicula pelicula : cineManager.getPeliculas()) {
-                double totalRecaudado = pelicula.getTotalRecaudado();
-
-                switch (pelicula.getNombre()) {
-                    case "PIRATAS":
-                        lblPiratas.setText(String.format("$%.2f", totalRecaudado));
-                        break;
-                    case "NARUTO":
-                        lblNaruto.setText(String.format("$%.2f", totalRecaudado));
-                        break;
-                    case "ANTMAN":
-                        lblAntman.setText(String.format("$%.2f", totalRecaudado));
-                        break;
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(panel1, "La cantidad debe ser un número válido");
+                    txtEntradas.requestFocus();
                 }
             }
-        }
+        });
 
-        private void limpiarCampos() {
-            txtCedula.setText("");
-            txtCantidad.setText("");
-            txtCedula.requestFocus();
+        // ActionListener para ENTER en txtEntradas
+        txtEntradas.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                comprarButton.doClick(); // Simular click en el botón comprar
+            }
+        });
+    }
+
+    private void actualizarInterfaz() {
+        actualizarCompras();
+        actualizarDisponibilidad();
+        actualizarTotalRecaudado();
+    }
+
+    private void actualizarCompras() {
+        txtCompras.setText("");
+        for (Compra compra : cine.getCompras()) {
+            txtCompras.append(compra.toString() + "\n");
         }
+        if (cine.getCompras().isEmpty()) {
+            txtCompras.setText("No hay compras realizadas");
+        }
+    }
+
+    private void actualizarDisponibilidad() {
+        for (Pelicula pelicula : cine.getPeliculas()) {
+            int disponibles = pelicula.getEntradasDisponibles();
+            switch (pelicula.getTitulo()) {
+                case "XMEN":
+                    DisponibleX.setText(String.valueOf(disponibles));
+                    break;
+                case "MARIO":
+                    DisponiblesM.setText(String.valueOf(disponibles));
+                    break;
+                case "BATMAN":
+                    DisponiblesB.setText(String.valueOf(disponibles));
+                    break;
+            }
+        }
+    }
+
+    private void actualizarTotalRecaudado() {
+        double total = cine.getTotalGeneralRecaudado();
+        if (lblTotalRecaudado != null) {
+            lblTotalRecaudado.setText(String.format("$%.2f", total));
+        }
+    }
+
+    private void limpiarCampos() {
+        txtNombre.setText("");
+        txtApellido.setText("");
+        txtEntradas.setText("");
+        txtNombre.requestFocus();
+    }
+
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Ventana");
+        JFrame frame = new JFrame("Sistema de Cine");
         frame.setContentPane(new Ventana().panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
-
-    }
-
+}

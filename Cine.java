@@ -1,42 +1,35 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Cine {
     private List<Pelicula> peliculas;
     private List<Compra> compras;
-    private Set<String> cedulasRegistradas;
 
     public Cine() {
         peliculas = new ArrayList<>();
         compras = new ArrayList<>();
-        cedulasRegistradas = new HashSet<>();
         inicializarPeliculas();
     }
 
     private void inicializarPeliculas() {
-        peliculas.add(new Pelicula("PIRATAS", 17, 5.0));
-        peliculas.add(new Pelicula("NARUTO", 17, 5.0));
-        peliculas.add(new Pelicula("ANTMAN", 17, 5.0));
+        peliculas.add(new Pelicula("XMEN", 2.25, 23));
+        peliculas.add(new Pelicula("MARIO", 3.25, 23));
+        peliculas.add(new Pelicula("BATMAN", 3.75, 23));
     }
 
-    public boolean realizarCompra(String cedula, String nombrePelicula, int cantidad) {
-        // Validar cédula única
-        if (cedulasRegistradas.contains(cedula)) {
-            return false;
-        }
-
-        Pelicula pelicula = buscarPelicula(nombrePelicula);
+    public boolean realizarCompra(String nombre, String apellido, String tituloPelicula, int cantidad) {
+        Pelicula pelicula = buscarPelicula(tituloPelicula);
         if (pelicula != null && pelicula.venderEntradas(cantidad)) {
-            Compra compra = new Compra(cedula, pelicula, cantidad);
+            Compra compra = new Compra(nombre, apellido, pelicula, cantidad);
             compras.add(compra);
-            cedulasRegistradas.add(cedula);
             return true;
         }
         return false;
     }
 
-    private Pelicula buscarPelicula(String nombre) {
+    private Pelicula buscarPelicula(String titulo) {
         for (Pelicula pelicula : peliculas) {
-            if (pelicula.getNombre().equals(nombre)) {
+            if (pelicula.getTitulo().equals(titulo)) {
                 return pelicula;
             }
         }
@@ -51,11 +44,16 @@ public class Cine {
         return new ArrayList<>(compras);
     }
 
-    public Pelicula getPeliculaPorNombre(String nombre) {
-        return buscarPelicula(nombre);
+    public double getTotalGeneralRecaudado() {
+        double total = 0;
+        for (Pelicula pelicula : peliculas) {
+            total += pelicula.getTotalRecaudado();
+        }
+        return total;
     }
 
-    public boolean cedulaExiste(String cedula) {
-        return cedulasRegistradas.contains(cedula);
+    // Método auxiliar para obtener una película por nombre
+    public Pelicula getPeliculaPorNombre(String nombre) {
+        return buscarPelicula(nombre);
     }
 }
